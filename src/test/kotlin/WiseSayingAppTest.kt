@@ -39,13 +39,13 @@ class WiseSayingAppTest {
         if (Files.notExists(path)) return
         Files.walk(path)
             .sorted(Comparator.reverseOrder())
-            .use { stream ->                       // ← 중요!
+            .use { stream ->
                 stream.forEach { Files.deleteIfExists(it) }
             }
     }
     @Test
     fun step1_exit() {
-        val out = run("종료\n")           // ← 기존 run(script) 헬퍼 사용
+        val out = run("종료\n")
         assertTrue(out.contains("앱을 종료합니다."))
     }
 

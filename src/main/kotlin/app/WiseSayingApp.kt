@@ -29,7 +29,7 @@ class WiseSayingApp(
             when(cmd.input)  {
                 "종료" -> {
                     out.println("앱을 종료합니다.")
-                    exiter.exit(0)              // 테스트에선 FakeExiter가 예외 던짐
+                    exiter.exit(0)
                 }
                 "등록" -> {
                     out.print("명언 : ")
@@ -41,7 +41,7 @@ class WiseSayingApp(
                     out.println("${id}번 명언이 등록되었습니다. \"$saying\" - $author")
                 }
                 "목록" -> {
-                    out.println()                               // ← 줄바꿈 추가 (중요)
+                    out.println()
 
                     val page = cmd.getInt("page") ?: 1
                     val keywordType = cmd.get("keywordType")
@@ -90,10 +90,10 @@ class WiseSayingApp(
                             continue
                         }
 
-                        cur.let { out.println("명언(기존) : ${it.saying}") }   // 공백/콜론 정확히
+                        cur.let { out.println("명언(기존) : ${it.saying}") }
                         out.print("명언 : ")
                         val newSaying = br.readLine() ?: continue
-                        cur.let { out.println("작가(기존) : ${it.author}") }   // 공백/콜론 정확히
+                        cur.let { out.println("작가(기존) : ${it.author}") }
                         out.print("작가 : ")
                         val newAuthor = br.readLine() ?: continue
                         val updatedSaying = wiseSayingController.update(id, newSaying, newAuthor)
