@@ -14,10 +14,10 @@ object RealExiter : Exiter {
 class WiseSayingApp(
     private val exiter: Exiter = RealExiter,
     private val input: InputStream = System.`in`,
-    private val out: PrintStream = System.out,
-    private val wiseSayingController: WiseSayingController
+    private val out: PrintStream = System.out
 
 ) {
+    private val wiseSayingController = WiseSayingController()
     fun run() {
         val br = input.bufferedReader()
 
@@ -29,7 +29,7 @@ class WiseSayingApp(
             when(cmd.input)  {
                 "종료" -> {
                     out.println("앱을 종료합니다.")
-                    exiter.exit(0)
+                    exiter.exit(0)              // 테스트에선 FakeExiter가 예외 던짐
                 }
                 "등록" -> {
                     out.print("명언 : ")

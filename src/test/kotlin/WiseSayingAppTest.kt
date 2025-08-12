@@ -26,8 +26,7 @@ class WiseSayingAppTest {
 
         val inStream = ByteArrayInputStream(script.toByteArray(StandardCharsets.UTF_8))
         val outBuf = ByteArrayOutputStream()
-        val controller = WiseSayingController()
-        val app  = WiseSayingApp(FakeExiter(), inStream, PrintStream(outBuf, true),controller)
+        val app  = WiseSayingApp(FakeExiter(), inStream, PrintStream(outBuf, true))
 
         assertFailsWith<TestExit> { app.run() }
         return outBuf.toString(StandardCharsets.UTF_8)
@@ -154,7 +153,6 @@ class WiseSayingAppTest {
         )
         assertTrue(out.contains("1번 명언이 삭제되었습니다."))
         assertTrue(out.contains("1번 명언은 존재하지 않습니다."))
-        // 재등록 시 3번이 되어야 함(재사용 금지)
         assertTrue(out.contains("3번 명언이 등록되었습니다."))
     }
 
@@ -195,7 +193,6 @@ class WiseSayingAppTest {
 
         val base = Paths.get("db")
 
-        // 1차 실행: 등록 2개 후 종료
         run(
             """
             등록
@@ -208,7 +205,6 @@ class WiseSayingAppTest {
             """.trimIndent()
         )
 
-        // 파일 존재/내용 확인
         val dir = Paths.get("db").resolve("wiseSaying")
         val f1 = dir.resolve("1.json")
         val f2 = dir.resolve("2.json")
@@ -222,7 +218,6 @@ class WiseSayingAppTest {
         assertTrue(j2.contains("\"id\": 2"))
         assertEquals("2", lastId)
 
-        // 2차 실행: 재시작 후 목록 확인(영속성 검증)
         val out2 = run(
             """
             목록
@@ -263,11 +258,9 @@ class WiseSayingAppTest {
 
         assertTrue(Files.exists(dataJson), "data.json이 생성되지 않음")
         val json = Files.readString(dataJson)
-        // 살아있는 2번의 수정된 내용이 반영되어야 함
         assertTrue(json.contains("\"id\": 2"))
         assertTrue(json.contains("현재와 자신을 사랑하라."))
         assertTrue(json.contains("홍길동"))
-        // 삭제된 1번은 없어야 함(간단 검증)
         assertTrue(!json.contains("\"id\": 1") || !json.contains("명언 1"))
     }
 
@@ -316,22 +309,18 @@ class WiseSayingAppTest {
 
         val out = run(sb.toString().trim()).replace("\r\n", "\n")
 
-        // 목록 블록 두 개를 머리글로 분할
         val anchors = Regex("""(?m)^번호 / 작가 / 명언$""").findAll(out).map { it.range.first }.toList()
         assertTrue(anchors.size >= 2, "목록 출력이 2번 나오지 않았습니다:\n$out")
 
         val firstBlock  = out.substring(anchors[0], anchors[1]) // 1페이지(10~6)
         val secondBlock = out.substring(anchors[1])             // 2페이지(5~1)
 
-        // 1페이지: 10~6
         assertTrue(firstBlock.contains("10 / 작자미상 10 / 명언 10"), firstBlock)
         assertTrue(firstBlock.contains("6 / 작자미상 6 / 명언 6"), firstBlock)
 
-        // 2페이지: 5~1
         assertTrue(secondBlock.contains("5 / 작자미상 5 / 명언 5"), secondBlock)
         assertTrue(secondBlock.contains("1 / 작자미상 1 / 명언 1"), secondBlock)
 
-        // 페이지 라인 검증 (라인 전체를 정규식으로 추출)
         val pageLines = Regex("""(?m)^페이지\s*:\s*(.+)$""").findAll(out).map { it.groupValues[1] }.toList()
         assertTrue(pageLines.size >= 2, "페이지 표기가 2번 나오지 않음:\n$out")
         assertTrue(pageLines[0].contains("[1]"), pageLines[0]) // 1페이지 표시

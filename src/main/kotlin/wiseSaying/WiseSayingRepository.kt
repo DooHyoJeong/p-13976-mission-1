@@ -38,11 +38,9 @@ class WiseSayingRepository(
     private val lastIdFile: Path = dir.resolve("lastId.txt")
     private val idSeq = FileIdSequence(lastIdFile)
 
-    // 메모리 캐시(목록/검색 성능용)
     private val store = linkedMapOf<Int, WiseSaying>()
     init {
         Files.createDirectories(dir)
-        // 1) *.json 로드
         Files.list(dir).use { stream ->
             stream.filter { it.fileName.toString().endsWith(".json") }
                 .forEach { path ->
@@ -51,7 +49,6 @@ class WiseSayingRepository(
                     }
                 }
         }
-        // 2) lastId 동기화
         val maxId = store.keys.maxOrNull() ?: 0
         idSeq.setIfHigher(maxId)
     }
@@ -83,7 +80,6 @@ class WiseSayingRepository(
         return removed
     }
 
-    // ----- 파일 I/O -----
 
     private fun writeJson(ws: WiseSaying) {
         val json = """

@@ -13,8 +13,6 @@ fun main() {
     val app = WiseSayingApp(
         exiter = RealExiter,
         input = System.`in`,
-        out   = System.out,
-        wiseSayingController = controller
-    )
+        out   = System.out)
     app.run()
 }
